@@ -13,7 +13,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Clock, Search as SearchIcon, RefreshCw, ArrowRight } from "lucide-react";
 import { useState, useEffect, useMemo, Suspense } from "react";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { SEARCH_PAGE_QUERY } from "@/sanity/lib/queries";
 import { urlFor } from "@/sanity/lib/image";
 import { ReleaseDate } from "@/components/wrapped/ReleaseDate";
@@ -34,7 +34,7 @@ function SearchResultsContent() {
     }
 
     setIsLoading(true);
-    client.fetch(SEARCH_PAGE_QUERY, { searchTerm: `*${queryText}*` })
+    fetchSanity(SEARCH_PAGE_QUERY, { searchTerm: `*${queryText}*` })
       .then((data) => {
         setResults(data || []);
       })

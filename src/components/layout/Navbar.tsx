@@ -34,7 +34,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { CATEGORIES_QUERY, SEARCH_SUGGESTIONS_QUERY, TRENDING_POSTS_QUERY } from "@/sanity/lib/queries";
 import { urlFor } from "@/sanity/lib/image";
 import { TypographySmall, TypographyMuted, TypographyLabel } from "@/components/wrapped/Typography";
@@ -176,8 +176,8 @@ export const Navbar = () => {
   useEffect(() => {
     setMounted(true);
     Promise.all([
-      client.fetch(CATEGORIES_QUERY),
-      client.fetch(TRENDING_POSTS_QUERY)
+      fetchSanity(CATEGORIES_QUERY),
+      fetchSanity(TRENDING_POSTS_QUERY)
     ]).then(([cats]) => {
       setDynamicCategories(cats || []);
     });
@@ -191,7 +191,7 @@ export const Navbar = () => {
   useEffect(() => {
     if (debouncedQuery.trim().length > 0) {
       setIsSearching(true);
-      client.fetch(SEARCH_SUGGESTIONS_QUERY, { searchTerm: `*${debouncedQuery}*` })
+      fetchSanity(SEARCH_SUGGESTIONS_QUERY, { searchTerm: `*${debouncedQuery}*` })
         .then((data) => {
           setSuggestions(data || []);
           setIsSearching(false)

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { POSTS_QUERY, CATEGORIES_QUERY } from "@/sanity/lib/queries";
 import { Container } from "@/components/wrapped/Layout";
 import { Title, TypographyMuted, TypographyLabel } from "@/components/wrapped/Typography";
@@ -133,8 +133,8 @@ export default function RecommendationsPage() {
       setIsLoading(true);
       try {
         const [postsData, catsData] = await Promise.all([
-          client.fetch(POSTS_QUERY),
-          client.fetch(CATEGORIES_QUERY)
+          fetchSanity(POSTS_QUERY),
+          fetchSanity(CATEGORIES_QUERY)
         ]);
         // Untuk rekomendasi, kita memprioritaskan yang isTrending
         const trendingOnly = postsData?.filter((p: any) => p.isTrending) || [];

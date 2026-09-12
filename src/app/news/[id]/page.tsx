@@ -16,19 +16,19 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/app/lib/placeholder-images";
-import { Share2, ArrowLeft, Bookmark, TrendingUp, Heart, MessageSquare, Copy, RefreshCw, AlertCircle } from "lucide-react";
+import { Share2, ArrowLeft, Bookmark, TrendingUp, Heart, MessageSquare, Copy, RefreshCw, AlertCircle, Eye } from "lucide-react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase";
-import { collection, serverTimestamp, doc, query, orderBy } from "firebase/firestore";
+import { collection, serverTimestamp, doc, query, orderBy, increment } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { PortableText } from "@portabletext/react";
 import { urlFor } from "@/sanity/lib/image";
 import { TRENDING_POSTS_QUERY } from "@/sanity/lib/queries";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { ReleaseDate } from "@/components/wrapped/ReleaseDate";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fetchEditorialContent, createSyncMetadata } from "@/lib/data-bridge";
@@ -144,6 +144,7 @@ export default function NewsDetailPage() {
   const [commentText, setCommentText] = useState("");
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const viewedSlugRef = useRef<string | null>(null);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -160,7 +161,7 @@ export default function NewsDetailPage() {
       try {
         const [editorial, trending] = await Promise.all([
           fetchEditorialContent(currentSlug),
-          client.fetch(TRENDING_POSTS_QUERY)
+          fetchSanity(TRENDING_POSTS_QUERY)
         ]);
 
         if (!editorial.data) {
@@ -199,6 +200,20 @@ export default function NewsDetailPage() {
 
   const { data: bookmarkData } = useDoc(bookmarkRef);
   const isSaved = !!bookmarkData;
+
+  const viewCountRef = useMemoFirebase(() =>
+    (db && currentSlug) ? doc(db, "posts", currentSlug) : null,
+  [db, currentSlug]);
+
+  const { data: viewCountData } = useDoc(viewCountRef);
+  const viewCount = viewCountData?.viewCount || 0;
+
+  useEffect(() => {
+    if (!db || !currentSlug || !sanityPost || viewedSlugRef.current === currentSlug) return;
+
+    viewedSlugRef.current = currentSlug;
+    setDocumentNonBlocking(viewCountRef!, { viewCount: increment(1) }, { merge: true });
+  }, [db, currentSlug, sanityPost, viewCountRef]);
 
   const commentsQuery = useMemoFirebase(() => 
     (db && currentSlug) ? query(collection(db, "posts", currentSlug, "comments"), orderBy("createdAt", "asc")) : null, 
@@ -302,7 +317,13 @@ export default function NewsDetailPage() {
                 </Avatar>
                 <div>
                   <span className="block font-bold text-xs text-primary">{sanityPost.author}</span>
-                  <ReleaseDate date={sanityPost.publishedAt} className="text-[10px] font-medium opacity-60 uppercase tracking-wider" />
+                  <div className="flex items-center gap-3">
+                    <ReleaseDate date={sanityPost.publishedAt} className="text-[10px] font-medium opacity-60 uppercase tracking-wider" />
+                    <span className="flex items-center gap-1 text-[10px] font-medium opacity-60 uppercase tracking-wider" aria-label={`${viewCount} pembaca`}>
+                      <Eye className="h-3 w-3" aria-hidden="true" />
+                      {viewCount.toLocaleString("id-ID")} pembaca
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">

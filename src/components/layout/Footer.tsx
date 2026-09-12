@@ -8,7 +8,7 @@ import { Facebook, Instagram, Linkedin, Mail } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { formatCasing } from "@/lib/casing";
 import { useState, useEffect } from "react";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { CATEGORIES_QUERY } from "@/sanity/lib/queries";
 
 const XIcon = () => (
@@ -21,7 +21,7 @@ export const Footer = () => {
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    client.fetch(CATEGORIES_QUERY).then((data) => {
+    fetchSanity(CATEGORIES_QUERY).then((data) => {
       setCategories(data || []);
     });
   }, []);
