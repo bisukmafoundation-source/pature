@@ -28,7 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PortableText } from "@portabletext/react";
 import { urlFor } from "@/sanity/lib/image";
 import { TRENDING_POSTS_QUERY } from "@/sanity/lib/queries";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { ReleaseDate } from "@/components/wrapped/ReleaseDate";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fetchEditorialContent, createSyncMetadata } from "@/lib/data-bridge";
@@ -161,7 +161,7 @@ export default function NewsDetailPage() {
       try {
         const [editorial, trending] = await Promise.all([
           fetchEditorialContent(currentSlug),
-          client.fetch(TRENDING_POSTS_QUERY)
+          fetchSanity(TRENDING_POSTS_QUERY)
         ]);
 
         if (!editorial.data) {

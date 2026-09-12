@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { POSTS_BY_CATEGORY_QUERY, CATEGORY_DETAIL_QUERY, CATEGORIES_QUERY } from "@/sanity/lib/queries";
 import { Container } from "@/components/wrapped/Layout";
 import { Title, Heading, TypographyMuted, TypographyLabel } from "@/components/wrapped/Typography";
@@ -136,9 +136,9 @@ export default function CategoryPage() {
       setIsLoading(true);
       try {
         const [catData, postsData, allCats] = await Promise.all([
-          client.fetch(CATEGORY_DETAIL_QUERY, { slug }),
-          client.fetch(POSTS_BY_CATEGORY_QUERY, { slug }),
-          client.fetch(CATEGORIES_QUERY)
+          fetchSanity(CATEGORY_DETAIL_QUERY, { slug }),
+          fetchSanity(POSTS_BY_CATEGORY_QUERY, { slug }),
+          fetchSanity(CATEGORIES_QUERY)
         ]);
         
         setCategory(catData);

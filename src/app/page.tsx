@@ -24,7 +24,7 @@ import {
 import { doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { urlFor } from "@/sanity/lib/image";
 import { POSTS_QUERY } from "@/sanity/lib/queries";
 import { ReleaseDate } from "@/components/wrapped/ReleaseDate";
@@ -199,7 +199,7 @@ export default function Home() {
     setMounted(true);
     const fetchSanityData = async () => {
       try {
-        const posts = await client.fetch(POSTS_QUERY);
+        const posts = await fetchSanity(POSTS_QUERY);
         setSanityPosts(posts || []);
         setHasError(false);
       } catch (error) {

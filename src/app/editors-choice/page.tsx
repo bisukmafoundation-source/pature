@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { client } from "@/sanity/lib/client";
+import { fetchSanity } from "@/lib/sanity-fetch";
 import { POSTS_QUERY } from "@/sanity/lib/queries";
 import { Container } from "@/components/wrapped/Layout";
 import { Title, TypographyMuted, TypographyLabel } from "@/components/wrapped/Typography";
@@ -70,7 +70,7 @@ export default function EditorsChoicePage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await client.fetch(POSTS_QUERY);
+        const data = await fetchSanity(POSTS_QUERY);
         setPosts(data?.filter((p: any) => p.isEditorsChoice) || []);
       } catch (error) {
         console.error("Failed to fetch editors choice:", error);
